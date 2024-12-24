@@ -1,1 +1,5 @@
 bump-my-version
+numpy
+pandas
+llama-cpp-python
+tqdm
