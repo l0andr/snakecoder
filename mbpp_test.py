@@ -2,7 +2,6 @@ import argparse
 import tqdm
 import os
 
-from bumpversion.ui import print_info
 from llama_cpp import Llama
 
 def construct_prompt(input_file:str):
@@ -59,22 +58,24 @@ if __name__ ==  "__main__":
     gguf_model = args.gguf_model
     verbose = args.verbose
     #create output directory
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
-    #create subdir in outdir with name of model and current date
-    outdir = os.path.join(outdir,os.path.basename(gguf_model))
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
 
     model_do_not_defined = True
     gguf_model_flag = False
+    model_name=""
     if gguf_model is not None:
         model_do_not_defined = False
         gguf_model_flag = True
         filename = os.path.abspath(gguf_model)
-
+        model_name = os.path.basename(gguf_model).split(".")[0]
     if model_do_not_defined:
         raise RuntimeError("Model is not defined")
+
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+        # create subdir in outdir with name of model and current date
+    outdir = os.path.join(outdir, model_name)
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
 
     #get list of *.py files from indir
     py_files = [f for f in os.listdir(indir) if f.endswith('.py')]
@@ -87,7 +88,7 @@ if __name__ ==  "__main__":
 
     #initialize model
     if gguf_model_flag:
-        llm = Llama(model_path=filename, **model_kwargs)
+        llm = Llama(model_path=filename, **model_kwargs,verbose=(verbose>1))
     else:
         raise RuntimeError("Not implemented yet")
 
@@ -122,7 +123,15 @@ if __name__ ==  "__main__":
                 break
             output_str += l + "\n"
         output_str += tests
-        with open(os.path.join(outdir,py_file), "w") as f:
+        out_file = f"{py_file.split('.')[0]}"
+        if "temperature" in generation_kwargs:
+            out_file += f"_t{generation_kwargs['temperature']}"
+        if args.llama_random_seed is not None:
+            out_file += f"_s{args.llama_random_seed}"
+        if "top_k" in generation_kwargs:
+            out_file += f"_k{generation_kwargs['top_k']}"
+        if "top_p" in generation_kwargs:
+            out_file += f"_p{generation_kwargs['top_p']}"
+        out_file += ".py"
+        with open(os.path.join(outdir,out_file), "w") as f:
             f.write(output_str)
-        if i > 10:
-            break
