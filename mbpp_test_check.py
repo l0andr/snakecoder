@@ -1,12 +1,7 @@
 '''
-This script take a directory with results of aoutomatic code generation for mbpp_56 test and check each files
-
--1. Load code of file and parse file name extracting test id and model parameters (temperature, seed, top_k, top_p)
-0. Try to load code of file. If this code contains error try to perform some fixes (fix_python_code)
-1. Try again after fix
-2. If code is correct, try to run check function
-3. If check function is correct, write true
-
+This script processes a directory containing Python files generated for the MBPP-56 test, validating their code and functionality.
+It parses filenames to extract metadata (test ID, model parameters), attempts to fix and load faulty code,
+and runs the `test_check` function within each file to verify results. Outputs a CSV summary of validation outcomes.
 '''
 import re
 import os
