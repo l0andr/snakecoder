@@ -3,3 +3,8 @@ numpy
 pandas
 llama-cpp-python
 tqdm
+matplotlib
+pyqt5
+requests
+beautifulsoup4
+GitPython

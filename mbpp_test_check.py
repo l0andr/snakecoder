@@ -192,11 +192,12 @@ def run_target_function(target_func, function_list):
     process = multiprocessing.Process(target=_worker)
     process.start()
     # Wait for up to 5 seconds
-    process.join(timeout=5)
+    process.join(timeout=2)
 
     # If still alive after 5 seconds, kill the child process and raise an error
     if process.is_alive():
-        process.terminate()
+        process.kill()
+        process.join()
         raise RuntimeError("Too long execution")
 
     # Fetch results from the queue (if any)
@@ -213,6 +214,7 @@ def run_target_function(target_func, function_list):
     return None
 
 if __name__ == "__main__":
+    multiprocessing.set_start_method("fork")
     parser = argparse.ArgumentParser(description="Check results of mbpp_56 test. Open each file, check syntax and run test_check function")
     parser.add_argument("--indir", type=str, help="Directory with results of run of LLM. Expected one file - one task.", required=True)
     parser.add_argument("--outfile", type=str, help="", required=True)
